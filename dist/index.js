@@ -25,23 +25,17 @@ const initialPageState = {
 function useRouter() {
     const [pageState, updatePageState] = taro_1.useState(initialPageState); // 页面状态
     taro_1.useEffect(() => {
-        // 由于taro设计缺陷
-        // https://nervjs.github.io/taro/docs/best-practice.html#%E7%BB%84%E4%BB%B6%E7%9A%84-constructor-%E4%B8%8E-render-%E6%8F%90%E5%89%8D%E8%B0%83%E7%94%A8
-        // hook第一次执行时还获取不到路由信息
-        // 故延迟执行
-        setTimeout(() => {
-            const routeStack = taro_1.default.getCurrentPages(); // 获取页面栈
-            const pageOnTop = routeStack[routeStack.length - 1] || {}; // 获取顶部页面
-            const shortenPageName = utils_1.getRouteName(pageOnTop.route); // 获取pageName
-            const query = pageOnTop.options || {};
-            updatePageState({
-                name: shortenPageName,
-                route: pageOnTop.route,
-                query,
-                from: query.__from,
-                depth: routeStack.length,
-            });
-        }, 0);
+        const routeStack = taro_1.default.getCurrentPages(); // 获取页面栈
+        const pageOnTop = routeStack[routeStack.length - 1] || {}; // 获取顶部页面
+        const shortenPageName = utils_1.getRouteName(pageOnTop.route); // 获取pageName
+        const query = pageOnTop.options || {};
+        updatePageState({
+            name: shortenPageName,
+            route: pageOnTop.route,
+            query,
+            from: query.__from,
+            depth: routeStack.length,
+        });
     }, [updatePageState]);
     taro_1.useEffect(() => {
         // 销毁时移除
