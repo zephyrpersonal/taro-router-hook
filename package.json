@@ -1,6 +1,6 @@
 {
   "name": "taro-router-hook",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist/index.js",
   "repository": "git@github.com:zephyrpersonal/taro-router-hook.git",
   "author": "zephyr <zephyr.workmail@gmail.com>",
