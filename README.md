@@ -2,6 +2,16 @@
 
 router hook for TaroJS
 
+## THIS HOOK IS PRE-PRODUCTION STAGE. USE AT YOUR OWN RISK
+
+## CAUTION 1
+
+由于 Taro 的组件初始化和路由机制，首次渲染会返回默认值，请注意做好安全取值方案
+
+routeState 的默认值为 `{route: null, name: null, from: null, query: null, depth: 0}`
+
+see also [issue-1](https://github.com/zephyrpersonal/taro-router-hook/issues/1)
+
 ## Install
 
 ```bash
@@ -21,10 +31,6 @@ const Component = () => {
 ```
 
 ### routeState
-
-由于 Taro 的组件初始化和路由机制，请注意做好安全取值方案
-
-routeState 的默认值为 `{route: null, name: null, from: null, query: null, depth: 0}`
 
 - `route` 原生路由名称 /page/{pageName}/index 默认值 null
 
@@ -72,6 +78,7 @@ const PageA = () => {
       <Button onClick={() => {
         const resp = await router.push('pageA', {hello: 'world'})
         // when PageB call pop, resp will be assigned with {foo: 'bar'}
+        console.log(resp.foo) // => 'bar'
       }}>To PageB</Button>
     </View>
   )

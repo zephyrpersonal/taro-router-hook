@@ -14,7 +14,27 @@ const taro_1 = __importStar(require("@tarojs/taro"));
 const query_string_1 = __importDefault(require("query-string"));
 const utils_1 = require("./utils");
 // 队列用于存放push/redirect的回调函数
-const pageNavigationCallbacks = [];
+const pageNavigationCallbacks = {
+    __callbacks: [],
+    add(callback) {
+        this.__callbacks.push(callback);
+    },
+    resolve(name, data) {
+        const callback = this.__callbacks.find((callback) => callback.name === name);
+        if (callback) {
+            callback.resolve(data);
+        }
+    },
+    remove(name) {
+        const index = this.__callbacks.findIndex((callback) => callback.name === name);
+        if (index >= 0) {
+            this.__callbacks.splice(index, 1);
+        }
+    },
+    empty() {
+        this.__callbacks = [];
+    },
+};
 const initialPageState = {
     name: null,
     query: null,
@@ -38,14 +58,13 @@ function useRouter() {
         });
     }, [updatePageState]);
     taro_1.useEffect(() => {
-        // 销毁时移除
         return () => {
-            const index = pageNavigationCallbacks.findIndex(callback => callback.name === pageState.name);
-            if (index >= 0) {
-                pageNavigationCallbacks.splice(index, 1);
-            }
+            // 销毁时移除本页面的pushCallback，适用于popToRoot返回首页
+            pageState.name && pageNavigationCallbacks.remove(pageState.name);
+            // 销毁时移除上页的pushCallback，适用于左上角标题箭头返回
+            pageState.from && pageNavigationCallbacks.remove(pageState.from);
         };
-    }, [pageState.name]);
+    }, [pageState.from, pageState.name]);
     const routeMethods = taro_1.useMemo(() => {
         return {
             push(path, data = {}, redirect = false) {
@@ -57,7 +76,7 @@ function useRouter() {
                         url: `/pages/${path}/index?${query_string_1.default.stringify(queryObj, { encode: false })}`,
                         success: () => {
                             if (pageState.name) {
-                                pageNavigationCallbacks.push({
+                                pageNavigationCallbacks.add({
                                     resolve,
                                     name: pageState.name,
                                 });
@@ -71,25 +90,13 @@ function useRouter() {
                 this.push(path, data, true);
             },
             pop(data, delta = 1) {
-                return new Promise((resolve, reject) => {
-                    taro_1.default.navigateBack({
-                        delta,
-                        success: res => {
-                            const storedCallbackIndex = pageNavigationCallbacks.findIndex(callback => callback.name === pageState.from);
-                            if (storedCallbackIndex >= 0) {
-                                pageNavigationCallbacks[storedCallbackIndex].resolve(data);
-                                pageNavigationCallbacks.splice(storedCallbackIndex, 1);
-                            }
-                            resolve(res);
-                        },
-                        fail: reject,
-                    });
+                pageState.from && pageNavigationCallbacks.resolve(pageState.from, data);
+                return taro_1.default.navigateBack({
+                    delta,
                 });
             },
             popToRoot() {
-                return new Promise((resolve, reject) => {
-                    taro_1.default.navigateBack({ delta: pageState.depth - 1, success: resolve, fail: reject });
-                });
+                return taro_1.default.navigateBack({ delta: pageState.depth - 1 });
             },
         };
     }, [pageState.from, pageState.name, pageState.depth]);
