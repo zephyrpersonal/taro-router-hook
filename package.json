@@ -25,7 +25,7 @@
     "build:watch": "tsc --watch"
   },
   "dependencies": {
-    "query-string": "^6.8.1"
+    "query-string": "5"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
