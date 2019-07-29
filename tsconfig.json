@@ -5,7 +5,7 @@
     "baseUrl": ".",
     "esModuleInterop": true,
     "experimentalDecorators": true,
-    "lib": ["esnext", "dom", "es6"],
+    "lib": ["esnext", "dom", "es6", "es5"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": false,
@@ -16,7 +16,7 @@
     "rootDir": "./src",
     "sourceMap": false,
     "strictNullChecks": true,
-    "target": "es2015",
+    "target": "es5",
     "traceResolution": false,
     "types": ["jest", "node"]
   },

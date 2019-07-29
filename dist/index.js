@@ -10,32 +10,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const taro_1 = __importStar(require("@tarojs/taro"));
-const query_string_1 = __importDefault(require("query-string"));
-const utils_1 = require("./utils");
+var taro_1 = __importStar(require("@tarojs/taro"));
+var query_string_1 = __importDefault(require("query-string"));
+var utils_1 = require("./utils");
 // 队列用于存放push/redirect的回调函数
-const pageNavigationCallbacks = {
+var pageNavigationCallbacks = {
     __callbacks: [],
-    add(callback) {
+    add: function (callback) {
         this.__callbacks.push(callback);
     },
-    resolve(name, data) {
-        const callback = this.__callbacks.find((callback) => callback.name === name);
+    resolve: function (name, data) {
+        var callback = this.__callbacks.find(function (callback) { return callback.name === name; });
         if (callback) {
             callback.resolve(data);
         }
     },
-    remove(name) {
-        const index = this.__callbacks.findIndex((callback) => callback.name === name);
+    remove: function (name) {
+        var index = this.__callbacks.findIndex(function (callback) { return callback.name === name; });
         if (index >= 0) {
             this.__callbacks.splice(index, 1);
         }
     },
-    empty() {
+    empty: function () {
         this.__callbacks = [];
     },
 };
-const initialPageState = {
+var initialPageState = {
     name: null,
     query: null,
     from: null,
@@ -43,59 +43,63 @@ const initialPageState = {
     depth: 0,
 };
 function useRouter() {
-    const [pageState, updatePageState] = taro_1.useState(initialPageState); // 页面状态
-    taro_1.useEffect(() => {
-        const routeStack = taro_1.default.getCurrentPages(); // 获取页面栈
-        const pageOnTop = routeStack[routeStack.length - 1] || {}; // 获取顶部页面
-        const shortenPageName = utils_1.getRouteName(pageOnTop.route); // 获取pageName
-        const query = pageOnTop.options || {};
+    var _a = taro_1.useState(initialPageState), pageState = _a[0], updatePageState = _a[1]; // 页面状态
+    taro_1.useEffect(function () {
+        var routeStack = taro_1.default.getCurrentPages(); // 获取页面栈
+        var pageOnTop = routeStack[routeStack.length - 1] || {}; // 获取顶部页面
+        var shortenPageName = utils_1.getRouteName(pageOnTop.route); // 获取pageName
+        var query = pageOnTop.options || {};
         updatePageState({
             name: shortenPageName,
             route: pageOnTop.route,
-            query,
+            query: query,
             from: query.__from,
             depth: routeStack.length,
         });
     }, [updatePageState]);
-    taro_1.useEffect(() => {
-        return () => {
+    taro_1.useEffect(function () {
+        return function () {
             // 销毁时移除本页面的pushCallback，适用于popToRoot返回首页
             pageState.name && pageNavigationCallbacks.remove(pageState.name);
             // 销毁时移除上页的pushCallback，适用于左上角标题箭头返回
             pageState.from && pageNavigationCallbacks.remove(pageState.from);
         };
     }, [pageState.from, pageState.name]);
-    const routeMethods = taro_1.useMemo(() => {
+    var routeMethods = taro_1.useMemo(function () {
         return {
-            push(path, data = {}, redirect = false) {
-                return new Promise((resolve, reject) => {
-                    const queryObj = Object.assign(data, {
+            push: function (path, data, redirect) {
+                if (data === void 0) { data = {}; }
+                if (redirect === void 0) { redirect = false; }
+                return new Promise(function (resolve, reject) {
+                    var queryObj = Object.assign(data, {
                         __from: pageState.name,
                     });
                     taro_1.default[redirect ? 'redirectTo' : 'navigateTo']({
-                        url: `/pages/${path}/index?${query_string_1.default.stringify(queryObj, { encode: false })}`,
-                        success: () => {
+                        url: "/pages/" + path + "/index?" + query_string_1.default.stringify(queryObj, { encode: false }),
+                        success: function () {
                             if (pageState.name) {
                                 pageNavigationCallbacks.add({
-                                    resolve,
+                                    resolve: resolve,
                                     name: pageState.name,
                                 });
                             }
                         },
-                        fail: e => reject(e),
+                        fail: function (e) { return reject(e); },
                     });
                 });
             },
-            redirect(path, data = {}) {
+            redirect: function (path, data) {
+                if (data === void 0) { data = {}; }
                 this.push(path, data, true);
             },
-            pop(data, delta = 1) {
+            pop: function (data, delta) {
+                if (delta === void 0) { delta = 1; }
                 pageState.from && pageNavigationCallbacks.resolve(pageState.from, data);
                 return taro_1.default.navigateBack({
-                    delta,
+                    delta: delta,
                 });
             },
-            popToRoot() {
+            popToRoot: function () {
                 return taro_1.default.navigateBack({ delta: pageState.depth - 1 });
             },
         };

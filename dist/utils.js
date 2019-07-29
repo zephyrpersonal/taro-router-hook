@@ -1,3 +1,3 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRouteName = (path) => (path ? path.split('/')[1] : '');
+exports.getRouteName = function (path) { return (path ? path.split('/')[1] : ''); };
